@@ -32,7 +32,7 @@ RUN apk --update add ca-certificates \
     chown -R onesim:netadmin /srv && \
     echo "✅ User 'onesim' added to groups: netadmin, wheel, and /app chowned"
 
-COPY --from=builder --chown=onesim:netadmin healthcheck.sh /healthcheck.sh
+COPY --from=builder --chown=onesim:netadmin /app/healthcheck.sh /healthcheck.sh
 RUN chmod +x /healthcheck.sh  # Make the script executable
 
 HEALTHCHECK --start-period=2s --interval=5s --timeout=3s \
@@ -41,8 +41,8 @@ HEALTHCHECK --start-period=2s --interval=5s --timeout=3s \
 VOLUME /srv
 EXPOSE 80
 
-COPY --from=builder --chown=onesim:netadmin docker_config.json /.filebrowser.json
-COPY --from=builder --chown=onesim:netadmin filebrowser /filebrowser
+COPY --from=builder --chown=onesim:netadmin /app/docker_config.json /.filebrowser.json
+COPY --from=builder --chown=onesim:netadmin /app/filebrowser /filebrowser
 
 USER onesim
 
