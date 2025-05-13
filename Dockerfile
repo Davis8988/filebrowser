@@ -1,10 +1,38 @@
-FROM alpine:latest
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.5.0 AS xx
+
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine3.21 AS builder
+
+COPY --from=xx / /
+
+ARG TARGETPLATFORM
+
+RUN xx-info env
+
+ENV CGO_ENABLED=0
+
+ENV XX_VERIFY_STATIC=1
+
+WORKDIR /app
+
+COPY . .
+
+RUN xx-go build && \
+    xx-verify gost
+
+
+FROM alpine:3.21
+
 RUN apk --update add ca-certificates \
                      mailcap \
                      curl \
-                     jq
+                     jq \
+                     shadow && \
+    addgroup -S netadmin && \
+    adduser -S -G netadmin -G wheel onesim && \
+    chown -R onesim:netadmin /srv && \
+    echo "✅ User 'onesim' added to groups: netadmin, wheel, and /app chowned"
 
-COPY healthcheck.sh /healthcheck.sh
+COPY --from=builder --chown=onesim:netadmin healthcheck.sh /healthcheck.sh
 RUN chmod +x /healthcheck.sh  # Make the script executable
 
 HEALTHCHECK --start-period=2s --interval=5s --timeout=3s \
@@ -13,7 +41,9 @@ HEALTHCHECK --start-period=2s --interval=5s --timeout=3s \
 VOLUME /srv
 EXPOSE 80
 
-COPY docker_config.json /.filebrowser.json
-COPY filebrowser /filebrowser
+COPY --from=builder --chown=onesim:netadmin docker_config.json /.filebrowser.json
+COPY --from=builder --chown=onesim:netadmin filebrowser /filebrowser
+
+USER onesim
 
 ENTRYPOINT [ "/filebrowser" ]
