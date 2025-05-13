@@ -17,7 +17,7 @@ WORKDIR /app
 COPY . .
 
 RUN xx-go build && \
-    xx-verify gost
+    xx-verify filebrowser
 
 
 FROM alpine:3.21
