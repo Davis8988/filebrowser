@@ -37,6 +37,7 @@ RUN chmod +x /healthcheck.sh && \
     addgroup -S netadmin && \
     adduser -S -G netadmin -G wheel onesim && \
     chown -R onesim:netadmin /srv && \
+    chown -R onesim:netadmin /app && \
     echo "✅ User 'onesim' added to groups: netadmin, wheel, and /app chowned"
 
 
