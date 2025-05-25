@@ -20,8 +20,8 @@ RUN xx-go build && \
     xx-verify filebrowser
 
 
-FROM alpine:3.21
 
+FROM alpine:3.21
 
 COPY --from=builder --chown=onesim:netadmin /app/healthcheck.sh /healthcheck.sh
 
