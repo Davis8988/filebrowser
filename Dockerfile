@@ -22,18 +22,24 @@ RUN xx-go build && \
 
 FROM alpine:3.21
 
-RUN apk --update add ca-certificates \
-                     mailcap \
-                     curl \
-                     jq \
-                     shadow && \
+
+COPY --from=builder --chown=onesim:netadmin /app/healthcheck.sh /healthcheck.sh
+RUN chmod +x /healthcheck.sh
+
+# Install docker CLI dependencies
+RUN apk --no-cache add \
+        docker-cli \
+        ca-certificates \
+        mailcap \
+        curl \
+        jq \
+        shadow && \
     addgroup -S netadmin && \
     adduser -S -G netadmin -G wheel onesim && \
     chown -R onesim:netadmin /srv && \
     echo "✅ User 'onesim' added to groups: netadmin, wheel, and /app chowned"
 
-COPY --from=builder --chown=onesim:netadmin /app/healthcheck.sh /healthcheck.sh
-RUN chmod +x /healthcheck.sh  # Make the script executable
+
 
 HEALTHCHECK --start-period=2s --interval=5s --timeout=3s \
     CMD /healthcheck.sh || exit 1
