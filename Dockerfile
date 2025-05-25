@@ -24,10 +24,10 @@ FROM alpine:3.21
 
 
 COPY --from=builder --chown=onesim:netadmin /app/healthcheck.sh /healthcheck.sh
-RUN chmod +x /healthcheck.sh
 
 # Install docker CLI dependencies
-RUN apk --no-cache add \
+RUN chmod +x /healthcheck.sh && \
+    apk --no-cache add \
         docker-cli \
         ca-certificates \
         mailcap \
